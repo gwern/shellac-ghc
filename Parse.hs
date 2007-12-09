@@ -6,12 +6,10 @@
 module Parse
     where
 
-import Text.ParserCombinators.Parsec
-import qualified Text.ParserCombinators.Parsec.Prim as P (try)
--- import Text.ParserCombinators.Parsec.Expr
--- import Text.ParserCombinators.Parsec.Token
--- import Text.ParserCombinators.Parsec.Language
--- import Text.ParserCombinators.Parsec.Token as P
+import Text.ParserCombinators.Parsec (Parser, char, (<|>), many, parse, manyTill,
+                                     anyChar, noneOf, string)
+import Text.ParserCombinators.Parsec.Prim as P (try)
+
 ----------------------------------------------------------------------------------
 -- | Get command name.
 getCmd :: String -> String
@@ -136,22 +134,3 @@ quote' = do b <- many (noneOf ['\''])
 escapeseq :: Parser String
 escapeseq = (P.try $ string "''") <|>
             (P.try $ string "\\'")
-
-
--- shStyle :: LanguageDef st
--- shStyle = haskellStyle
-
--- sh :: TokenParser st
--- sh = makeTokenParser shStyle
-
--- lexer       = makeTokenParser shStyle
-
--- parens      = P.parens lexer
-
--- brace      = P.braces lexer
--- identifiers  = P.identifier lexer
--- reserv'd    = P.reserved lexer
--- expr  =   (P.parens lexer) expr
---        <|> identifiers
---        <|> reserv'd
--- --       <|> reserv'd

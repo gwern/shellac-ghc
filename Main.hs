@@ -1,11 +1,12 @@
 module Main where
 
-import GHCEval
-import Commands
-import Control.Monad.State
-import System.Console.Shell
-import System.Console.Shell.Backend.Readline
-import System.IO
+import Commands(commands)
+import GHCEval(Session, initializeGHC, eval)
+
+import System.Console.Shell.Backend.Readline(readlineBackend)
+import System.Console.Shell(ShellDescription(shellCommands, maxHistoryEntries,
+                                             historyFile, historyEnabled, evaluateFunc, commandStyle),
+                            CommandStyle(CharPrefixCommands), initialShellDescription, runShell)
 
 {- 1.  Create a list of shell commands and an evaluation function
    2. Create a shell description (using mkShellDescription)

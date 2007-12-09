@@ -1,12 +1,11 @@
 module GHCEval where
-import qualified GHC -- (LoadAllTargets, Session, defaultErrorHandler,
-                     -- findModule, getSessionDynFlags, load, mkModuleName,
-                     -- newSession, runStmt, setContext, setSessionDynFlags)
+
+import Control.Monad.State (Monad(return, (>>)), mapM, MonadIO(..))
+import Data.Dynamic (fromDyn)
 import qualified DynFlags
-import System.IO.Unsafe
-import System.Console.Shell.ShellMonad
-import Data.Dynamic
-import Control.Monad.State
+import qualified GHC
+import System.Console.Shell.ShellMonad (Sh, shellPutStrLn, shellPutErrLn, getShellSt)
+import System.IO.Unsafe (unsafePerformIO)
 
 import Commands (exec)
 

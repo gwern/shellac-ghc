@@ -1,13 +1,14 @@
 module Commands where
-import Data.List
-import Parse as P
+
+import Control.Monad.State (Monad(return, (>>), (>>=)), MonadIO(..))
+import Data.List ((++), length)
+import Parse as P (getCmd, getArg)
 import System.Cmd (rawSystem)
-import Control.Monad.State
-import System.Console.Shell
-import System.Console.Shell.ShellMonad
-import System.Exit
-import System.IO
-import System.Process
+import System.Console.Shell (ShellCommand, cmd, exitCommand)
+import System.Console.Shell.ShellMonad (Sh, shellPutStrLn)
+import System.Exit (ExitCode)
+import System.IO (IO, hGetContents)
+import System.Process (runInteractiveProcess, waitForProcess)
 
 -------------------------
 -- Commands
@@ -15,8 +16,8 @@ import System.Process
 commands :: [ShellCommand (a)]
 commands =  [cmd "top" (top) "run top",
              cmd "echo" (echo) "run echo",
-             cmd "fork" (doFork "echo foo && cat none") "external command",
-             cmd "" (doExec) "external command",
+             cmd "fork" (doFork "echo foo && cat none; top -n 1") "external command",
+             cmd "" (doExec) "Run a specified external command.",
             exitCommand "quit"]
 
 doExec :: String -> Sh (a) ()
@@ -43,8 +44,7 @@ fork string = do
        -- ... until the output is exhausted and the program has finished
        waitForProcess pid
    length errors `seq` do
-       waitForProcess pid
-   return $ results ++ errors
+                return $ results ++ errors
 
 -- | Basic command execution.
 exec :: String -> IO ExitCode
