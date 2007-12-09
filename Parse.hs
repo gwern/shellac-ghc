@@ -10,8 +10,8 @@ import Text.ParserCombinators.Parsec
 import qualified Text.ParserCombinators.Parsec.Prim as P (try)
 -- import Text.ParserCombinators.Parsec.Expr
 -- import Text.ParserCombinators.Parsec.Token
-import Text.ParserCombinators.Parsec.Language
-import Text.ParserCombinators.Parsec.Token as P
+-- import Text.ParserCombinators.Parsec.Language
+-- import Text.ParserCombinators.Parsec.Token as P
 ----------------------------------------------------------------------------------
 -- | Get command name.
 getCmd :: String -> String
@@ -57,6 +57,7 @@ findSubStr as bs = let f [] _ = True
                        f (a:as') (b:bs')
                            | a == b = f as' bs'
                            | a /= b = f as bs'
+                       f _ _ = False
                        in
                        f as bs
 
