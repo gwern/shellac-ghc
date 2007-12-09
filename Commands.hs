@@ -16,13 +16,17 @@ commands :: [ShellCommand (a)]
 commands =  [cmd "top" (top) "run top",
              cmd "echo" (echo) "run echo",
              cmd "fork" (doFork "echo foo && cat none") "external command",
+             cmd "" (doExec) "external command",
             exitCommand "quit"]
+
+doExec :: String -> Sh (a) ()
+doExec a = liftIO $ exec a >> return ()
 
 top :: Sh (a) ()
 top = liftIO $ exec "top" >> return ()
 
-echo :: Sh (a) ()
-echo = liftIO $ fork ("echo 'foo'") >> return ()
+echo :: String -> Sh (a) ()
+echo s = liftIO $ exec ("echo foo bar " ++  s) >> return ()
 
 -- | Wrapper around 'fork' to make it usable by 'cmd'.
 doFork :: String -> Sh (a) ()
