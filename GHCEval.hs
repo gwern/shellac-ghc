@@ -4,18 +4,16 @@ import qualified GHC -- (LoadAllTargets, Session, defaultErrorHandler,
                      -- newSession, runStmt, setContext, setSessionDynFlags)
 import qualified DynFlags
 import System.IO.Unsafe
--- import System.Console.Shell
--- import System.Console.Shell.Backend.Readline
 import System.Console.Shell.ShellMonad
 import Data.Dynamic
 import Control.Monad.State
 
 import Commands (exec)
+
 --------------------------------
 -- Initialization of GHC session
 --------------------------------
-
-type Session = GHC.Session
+type Session = GHC.Session -- for export
 
 -- | default configuration
 ghcPath :: String
@@ -35,7 +33,7 @@ initializeGHC = GHC.defaultErrorHandler DynFlags.defaultDynFlags $ do
                              loadModules session modules
                              return session
 
--- Perhaps don't blindly load modules and claim they all succeeded]...
+-- Perhaps don't blindly load modules and claim they all succeeded...
 loadModules :: GHC.Session -> [String] -> IO ()
 loadModules session mod = do modules <- mapM (\m -> GHC.findModule session (GHC.mkModuleName m) Nothing) mod
                              GHC.setContext session [] modules

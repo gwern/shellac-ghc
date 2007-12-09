@@ -1,16 +1,12 @@
--- import Data.List
--- import Data.Dynamic
+module Main where
+
 import GHCEval
 import Commands
--- import Parse as P
--- import System.Cmd (rawSystem)
 import Control.Monad.State
 import System.Console.Shell
 import System.Console.Shell.Backend.Readline
--- import System.Console.Shell.ShellMonad
--- import System.Exit
 import System.IO
--- import System.Process
+
 {- 1.  Create a list of shell commands and an evaluation function
    2. Create a shell description (using mkShellDescription)
    3. Set up the initial shell state
@@ -22,6 +18,7 @@ main = do s <- initializeGHC
           runShell (createShellDescription) (readlineBackend) s
           return ()
 
+-- | Default shell configuration.
 createShellDescription :: ShellDescription Session
 createShellDescription =
   initialShellDescription {

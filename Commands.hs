@@ -1,12 +1,9 @@
 module Commands where
 import Data.List
--- import Data.Dynamic
--- import GHCEval (a)
 import Parse as P
 import System.Cmd (rawSystem)
 import Control.Monad.State
 import System.Console.Shell
--- import System.Console.Shell.Backend.Readline
 import System.Console.Shell.ShellMonad
 import System.Exit
 import System.IO
@@ -22,7 +19,7 @@ commands =  [cmd "top" (top) "run top",
             exitCommand "quit"]
 
 top :: Sh (a) ()
-top = liftIO $ exec "top" >> return () --modifyShellSt (\x -> exec "top" >> x)
+top = liftIO $ exec "top" >> return ()
 
 echo :: Sh (a) ()
 echo = liftIO $ fork ("echo 'foo'") >> return ()
@@ -39,7 +36,7 @@ fork string = do
    errors <- (hGetContents err)
    -- force output to be read strictly...
    length results `seq` do
-       -- ... until the output is exausted and the program has died ...
+       -- ... until the output is exhausted and the program has finished
        waitForProcess pid
    length errors `seq` do
        waitForProcess pid
