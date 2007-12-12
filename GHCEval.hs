@@ -1,3 +1,4 @@
+{-# OPTIONS_GHC -fth #-}
 module GHCEval where
 
 import Control.Monad.State (Monad(return, (>>)), mapM, MonadIO(..))
@@ -6,8 +7,13 @@ import qualified DynFlags
 import qualified GHC
 import System.Console.Shell.ShellMonad (Sh, shellPutStrLn, shellPutErrLn, getShellSt)
 import System.IO.Unsafe (unsafePerformIO)
+import Data.List
+import System.Directory
+import Control.Monad -- (join, liftM)
+import System.FilePath
 
-import Commands (exec)
+import Commands (doExec, exec)
+import TH
 
 --------------------------------
 -- Initialization of GHC session
@@ -16,7 +22,7 @@ type Session = GHC.Session -- for export
 
 -- | default configuration
 ghcPath :: String
-ghcPath = "/home/gwern/bin/lib/ghc-6.9.20071201"
+ghcPath = unsafePerformIO $(path) -- unsafePerformIO $ ghcDirectory
 
 initializeGHC :: IO GHC.Session
 initializeGHC = GHC.defaultErrorHandler DynFlags.defaultDynFlags $ do
@@ -36,26 +42,23 @@ initializeGHC = GHC.defaultErrorHandler DynFlags.defaultDynFlags $ do
 loadModules :: GHC.Session -> [String] -> IO ()
 loadModules session mod = do modules <- mapM (\m -> GHC.findModule session (GHC.mkModuleName m) Nothing) mod
                              GHC.setContext session [] modules
-                             return ()
 
 ---------------------------------------
 -- Parsing and evaluation
 ---------------------------------------
 eval :: String -> Sh (GHC.Session) ()
 eval "" = return ()
-eval a = do s <- getShellSt
-            dyn <- liftIO $ GHC.dynCompileExpr s $ "show (" ++ a ++ ")"
-            case dyn of
-              Nothing -> shellPutErrLn "Failed to compile expression!"
-              Just d  -> shellPutStrLn $ fromDyn d $ error "Dynamic expression failed to produce a string."
-
-parser :: String -> IO GHC.Session -> IO GHC.Session
-parser x s = putStrLn x >> s
+eval ('!':as) = doExec as
+eval as = do s <- getShellSt
+             dyn <- liftIO $ GHC.dynCompileExpr s $ "show (" ++ as ++ ")"
+             case dyn of
+               Nothing -> shellPutErrLn "Failed to compile expression!"
+               Just d  -> shellPutStrLn $ fromDyn d $ error "Dynamic expression failed to produce a string."
 
 {-# NOINLINE evalSplit #-}
 evalSplit :: String -> IO GHC.Session -> IO GHC.Session
-evalSplit x s = if (head x /= '!') then GHC.runStmt (unsafePerformIO s) x GHC.SingleStep >> s
-                                    else exec (tail x) >> s
+evalSplit ('!':as) s = exec (tail as) >> s
+evalSplit as s = GHC.runStmt (unsafePerformIO s) as GHC.SingleStep >> s
 
 spl :: String -> [String]
 spl = split ">>"

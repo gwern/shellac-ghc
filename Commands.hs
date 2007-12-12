@@ -1,7 +1,7 @@
 module Commands where
 
 import Control.Monad.State (Monad(return, (>>), (>>=)), MonadIO(..))
-import Data.List ((++), length)
+import Data.List ((++))
 import Parse as P (getCmd, getArg)
 import System.Cmd (rawSystem)
 import System.Console.Shell (ShellCommand, cmd, exitCommand)
@@ -17,8 +17,8 @@ commands :: [ShellCommand (a)]
 commands =  [cmd "top" (top) "run top",
              cmd "echo" (echo) "run echo",
              cmd "fork" (doFork "echo foo && cat none; top -n 1") "external command",
-             cmd "" (doExec) "Run a specified external command.",
-            exitCommand "quit"]
+             cmd "" (doFork) "Run a specified external command.",
+             exitCommand "quit"]
 
 doExec :: String -> Sh (a) ()
 doExec a = liftIO $ exec a >> return ()
@@ -39,17 +39,10 @@ fork string = do
    (_,out,err,pid) <- runInteractiveProcess "/bin/sh" ["-c",string] Nothing Nothing
    results <- (hGetContents out)
    errors <- (hGetContents err)
-   -- force output to be read strictly...
-   length results `seq` do
-       -- ... until the output is exhausted and the program has finished
-       waitForProcess pid
-   length errors `seq` do
-                return $ results ++ errors
+   -- ... until the output is exhausted and the program has finished
+   waitForProcess pid
+   return $ results ++ errors
 
 -- | Basic command execution.
 exec :: String -> IO ExitCode
 exec e = rawSystem (P.getCmd e) (P.getArg e)
-
--- | Pipeline operator; left-to-right instead of ($)'s right-to-left
-(|>) :: a -> (a -> b) -> b
-(|>) = flip ($)
