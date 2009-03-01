@@ -57,8 +57,8 @@ eval as = do s <- getShellSt
 
 {-# NOINLINE evalSplit #-}
 evalSplit :: String -> IO GHC.Session -> IO GHC.Session
-evalSplit ('!':as) s = exec (tail as) >> s
-evalSplit as s = GHC.runStmt (unsafePerformIO s) as GHC.SingleStep >> s
+evalSplit ('!':bs) s = exec (tail bs) >> s
+evalSplit bs s = GHC.runStmt (unsafePerformIO s) bs GHC.SingleStep >> s
 
 spl :: String -> [String]
 spl = split ">>"
